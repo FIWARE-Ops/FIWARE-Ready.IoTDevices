@@ -15,7 +15,7 @@ It has a recipe to redeploy an environment to validate FIWARE-Ready IoT Devices.
     + `config.json` with docker credentials must be put to `docker/`
     + `ansible_host` in `hosts` must be filled in with the external ip of the target host
     + please, verify the value of `MTU` parameter in `docker.yml` and `docker/daemon.json`
-   + DNS
+  + DNS
     + iot-ready-json.lab.fiware.org should point to a server
     + iot-ready-ul.lab.fiware.org should point to a server
 
