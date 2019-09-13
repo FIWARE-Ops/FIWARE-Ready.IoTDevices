@@ -1,0 +1,114 @@
+---
+  - name: rm stack
+    shell: docker stack rm validator
+
+  - name: clean host
+    shell: docker {{ item }} prune -f
+    with_items:
+      - container
+      - volume
+
+  - name: create json mosquitto data folder
+    become: true
+    file:
+      path: /home/ubuntu/validator/json-mosquitto/data/
+      state: "{{ item }}"
+      owner: 1883
+      group: ubuntu
+    with_items:
+      - absent
+      - directory
+
+  - name: create json mosquitto log folder
+    become: true
+    file:
+      path: /home/ubuntu/validator/json-mosquitto/log/
+      state: "{{ item }}"
+      owner: 1883
+      group: ubuntu
+    with_items:
+      - absent
+      - directory
+
+  - name: create ul mosquitto data folder
+    become: true
+    file:
+      path: /home/ubuntu/validator/ul-mosquitto/data/
+      state: "{{ item }}"
+      owner: 1883
+      group: ubuntu
+    with_items:
+      - absent
+      - directory
+
+  - name: create ul mosquitto log folder
+    become: true
+    file:
+      path: /home/ubuntu/validator/ul-mosquitto/log/
+      state: "{{ item }}"
+      owner: 1883
+      group: ubuntu
+    with_items:
+      - absent
+      - directory
+
+  - name: create mongo folder
+    become: true
+    file:
+      path: /home/ubuntu/validator/mongo
+      state: "{{ item }}"
+      owner: 999
+      group: ubuntu
+    with_items:
+      - absent
+      - directory
+
+  - name: create nginx folder
+    become: true
+    file:
+      path: /home/ubuntu/validator/nginx
+      state: "{{ item }}"
+      owner: 999
+      group: ubuntu
+    with_items:
+      - absent
+      - directory
+
+  - name: copy docker-compose
+    copy:
+      src: validator/docker-compose.yml
+      dest: /home/ubuntu/validator/docker-compose.yml
+
+  - name: pull images
+    shell: docker-compose pull
+    args:
+      chdir: /home/ubuntu/validator/
+
+  - name: sync files
+    become: true
+    synchronize:
+      src: validator/
+      dest: /home/ubuntu/validator/static/
+      delete: true
+
+  - name: run stack
+    shell: docker stack deploy --compose-file docker-compose.yml validator
+    args:
+      chdir: /home/ubuntu/validator
+
+  - name: check if mongo up
+    shell: docker service logs validator_mongo 2>&1 | sed 's/"//g'
+    register: test
+    until: test.stdout.find('waiting for connections on port 27017') != -1
+    delay: 7
+    retries: 7
+
+  - name: check if orion up
+    shell: docker run -it --rm --network validator caa06d9c/support curl {{ item }}-orion:1026/version
+    register: test
+    until: test.stdout.find('orion') != -1
+    delay: 7
+    retries: 7
+    with_items:
+      - ul
+      - json

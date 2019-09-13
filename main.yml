@@ -1,0 +1,14 @@
+- hosts: server
+  gather_facts: true
+  become: false
+  tasks:
+    - import_tasks: machine.yml
+      when: prepare is defined
+
+    - import_tasks: node_exporter.yml
+      when: prepare is defined
+
+    - import_tasks: docker.yml
+      when: prepare is defined
+
+    - import_tasks: validator.yml

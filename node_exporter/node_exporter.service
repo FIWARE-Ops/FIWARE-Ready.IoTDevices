@@ -1,0 +1,58 @@
+[Unit]
+Description=Prometheus exporter for machine metrics
+Documentation=https://prometheus.io
+After=network.target nss-lookup.target
+
+[Service]
+Type=simple
+User=prometheus
+ExecStart=/opt/node_exporter/node_exporter \
+          --collector.systemd \
+          --collector.diskstats.ignored-devices="^(dm-|ram|loop|fd|(h|s|v|xv)d[a-z]|nvme\\d+n\\d+p)\\d+$" \
+          --collector.filesystem.ignored-mount-points="^/(dev|proc|sys|run|var/lib/(docker|lxcfs|nobody_tmp_secure))($|/)" \
+          --collector.filesystem.ignored-fs-types="^(autofs|binfmt_misc|cgroup|configfs|debugfs|devpts|devtmpfs|fuse.*|hugetlbfs|mqueue|overlay|proc|procfs|pstore|rpc_pipefs|securityfs|sysfs|tmpfs|tracefs)$" \
+          --collector.netdev.ignored-devices="^(lo|docker.+|br.+|veth.+)$" \
+          --collector.conntrack \
+          --collector.cpu \
+          --collector.diskstats \
+          --collector.filefd \
+          --collector.filesystem \
+          --collector.loadavg \
+          --collector.meminfo \
+          --collector.netdev \
+          --collector.netstat \
+          --collector.ntp \
+          --collector.sockstat \
+          --collector.stat \
+          --collector.textfile \
+          --collector.time \
+          --collector.uname \
+          --collector.vmstat \
+          --no-collector.arp \
+          --no-collector.bcache \
+          --no-collector.bonding \
+          --no-collector.buddyinfo \
+          --no-collector.drbd \
+          --no-collector.edac \
+          --no-collector.entropy \
+          --no-collector.hwmon \
+          --no-collector.infiniband \
+          --no-collector.interrupts \
+          --no-collector.ipvs \
+          --no-collector.ksmd \
+          --no-collector.logind \
+          --no-collector.mdadm \
+          --no-collector.meminfo_numa \
+          --no-collector.mountstats \
+          --no-collector.nfs \
+          --no-collector.nfsd \
+          --no-collector.qdisc \
+          --no-collector.runit \
+          --no-collector.supervisord \
+          --no-collector.tcpstat \
+          --no-collector.timex \
+          --no-collector.wifi \
+          --no-collector.xfs \
+          --no-collector.zfs
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,9 @@
+{
+  "debug" : false,
+  "insecure-registries" : [
+    "registry.lab.fiware.org",
+    "repo.lab.fiware.org"
+  ],
+  "experimental" : true,
+  "mtu": 1400
+}

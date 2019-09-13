@@ -1,0 +1,49 @@
+---
+  - name: fix node_exporter user
+    become: true
+    user:
+      name: prometheus
+      state: present
+
+  - name: download node_exporter
+    become: true
+    unarchive:
+      src: 'https://github.com/prometheus/node_exporter/releases/download/v0.18.1/node_exporter-0.18.1.linux-amd64.tar.gz'
+      dest: /opt/
+      owner: prometheus
+      group: prometheus
+      mode: 0755
+      remote_src: yes
+
+  - name: create a link for node_exporter
+    become: true
+    file:
+      src: '/opt/node_exporter-0.18.1.linux-amd64'
+      dest: /opt/node_exporter
+      state: link
+
+  - name: copy systemd templates
+    become: true
+    copy:
+      src:  node_exporter/node_exporter.service
+      dest: /etc/systemd/system/node_exporter.service
+      force: yes
+      owner: root
+      group: root
+      mode: 0644
+
+  - name: exec systemd
+    become: true
+    systemd:
+      name: node_exporter
+      state: restarted
+      daemon_reload: yes
+      enabled: true
+
+  - name: check hw
+    shell: if [ "$(ps axu | grep node_exporter | grep -v grep)" != "" ]; then echo "true"; else echo "false"; fi
+    register: check
+
+  - name: failed if not work
+    fail:
+    when: check.stdout == "false"
